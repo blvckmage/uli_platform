@@ -20,7 +20,28 @@
     </label>
     <button type="submit" class="btn-primary">Войти</button>
   </form>
-  <p class="muted small">По умолчанию: admin / admin123</p>
 </div>
+<script>
+(function(){
+  var inp = document.querySelector('input[name="email"]');
+  if (!inp) return;
+  function fmt(d){
+    d = (d||'').replace(/\D/g,'');
+    if (d.length && d[0] === '8') d = '7' + d.slice(1);
+    if (d.length && d[0] !== '7') return null;
+    d = d.slice(0,11);
+    if (d.length <= 1) return '7';
+    if (d.length <= 4) return '7(' + d.slice(1);
+    if (d.length <= 7) return '7(' + d.slice(1,4) + ') - ' + d.slice(4);
+    return '7(' + d.slice(1,4) + ') - ' + d.slice(4,7) + ' - ' + d.slice(7,11);
+  }
+  inp.addEventListener('input', function(){
+    var v = inp.value.trim();
+    if (/^[\d()+\-\s]+$/.test(v) && v.replace(/\D/g,'').length >= 2) {
+      var f = fmt(v); if (f) inp.value = f;
+    }
+  });
+})();
+</script>
 </body>
 </html>

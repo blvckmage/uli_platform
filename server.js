@@ -79,6 +79,14 @@ function recalcTaskStatus(task) {
   }
   return task;
 }
+function formatPhone(input) {
+  if (!input) return '';
+  let d = String(input).replace(/\D/g, '');
+  if (d.length && d[0] === '8') d = '7' + d.slice(1);
+  if (d.length === 10) d = '7' + d;
+  if (d.length !== 11 || d[0] !== '7') return null;
+  return '7(' + d.slice(1, 4) + ') - ' + d.slice(4, 7) + ' - ' + d.slice(7, 11);
+}
 function notify(userId, title, message) {
   db.notifications.insert({ user_id: userId, title, message, is_read: '0' });
 }
@@ -110,7 +118,10 @@ app.get('/login', (req, res) => {
 });
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const user = db.users.find(u => (u.email === email || u.phone === email) && u.status !== 'fired');
+  const phoneNorm = formatPhone(email);
+  const user = db.users.find(u =>
+    (u.email === email || u.phone === email || (phoneNorm && u.phone === phoneNorm)) && u.status !== 'fired'
+  );
   if (!user || !bcrypt.compareSync(password || '', user.password_hash)) {
     return res.render('login', { error: 'Неверный логин или пароль' });
   }
@@ -207,9 +218,14 @@ app.get('/employees/new', requireAuth, requireRole('admin', 'partner', 'manager'
 app.post('/employees', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
   const body = req.body;
   if (req.user.role === 'manager') body.business_id = req.user.business_id;
+  const phone = formatPhone(body.phone);
+  if (body.role !== 'admin' && body.role !== 'partner' && !phone) {
+    return res.status(400).send('Неверный формат телефона. Используйте 7(XXX) - XXX - XXXX');
+  }
   const hash = bcrypt.hashSync(body.password || 'changeme', 8);
   db.users.insert({
-    name: body.name, surname: body.surname, phone: body.phone, email: body.email,
+    name: body.name, surname: body.surname, phone: phone || body.phone || '',
+    email: body.email || phone || '',
     password_hash: hash, role: body.role || 'employee', business_id: body.business_id || '',
     status: body.status || 'active'
   });
@@ -233,6 +249,10 @@ app.post('/employees/:id', requireAuth, requireRole('admin', 'partner', 'manager
   const patch = { ...req.body };
   if (patch.password) { patch.password_hash = bcrypt.hashSync(patch.password, 8); }
   delete patch.password;
+  if (patch.phone) {
+    const p = formatPhone(patch.phone);
+    if (p) patch.phone = p;
+  }
   db.users.update(req.params.id, patch);
   res.redirect('/employees/' + req.params.id);
 });
