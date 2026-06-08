@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+<h1>Мои задачи</h1>
+<%
+const sections = [
+  ['На сегодня', today],
+  ['На завтра', tomorrow],
+  ['Будущие', future],
+  ['Просроченные', overdue],
+  ['Выполненные', done]
+];
+%>
+<% sections.forEach(([label, list]) => { %>
+  <h2><%= label %> (<%= list.length %>)</h2>
+  <% if (!list.length) { %><p class="muted">Нет задач</p><% } else { %>
+    <div class="cards-grid">
+    <% list.forEach(t => { %>
+      <a class="task-card" href="/tasks/<%= t.id %>">
+        <div class="badge badge-<%= STATUS_COLORS[t.status] %>"><%= STATUS_LABELS[t.status] %></div>
+        <h3><%= t.title %></h3>
+        <div class="muted"><%= t.task_date %> <%= t.deadline_time %></div>
+        <div>План: <strong><%= t.planned_value %> <%= t.unit %></strong> · Факт: <strong><%= t.actual_value %></strong> · <%= t.completion_percent %>%</div>
+      </a>
+    <% }) %>
+    </div>
+  <% } %>
+<% }) %>
+<%- include('partials/footer') %>

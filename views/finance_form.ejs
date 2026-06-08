@@ -1,0 +1,18 @@
+<%- include('partials/header') %>
+<h1>Финансовый отчет</h1>
+<form method="post" action="/finance" enctype="multipart/form-data" class="form">
+  <label>Бизнес
+    <select name="business_id" required>
+      <% businesses.forEach(b => { %><option value="<%= b.id %>" <%= user.business_id===b.id?'selected':'' %>><%= b.name %></option><% }) %>
+    </select>
+  </label>
+  <label>Дата<input type="date" name="report_date" required value="<%= new Date().toISOString().slice(0,10) %>"></label>
+  <div class="row">
+    <label>Выручка (₸)<input type="number" step="any" name="revenue" required></label>
+    <label>Расходы (₸)<input type="number" step="any" name="expenses" required></label>
+  </div>
+  <label>Комментарий<textarea name="comment"></textarea></label>
+  <label>Excel-файл (xls, xlsx, csv)<input type="file" name="excel" accept=".xls,.xlsx,.csv"></label>
+  <button class="btn-primary" type="submit">Сохранить</button>
+</form>
+<%- include('partials/footer') %>

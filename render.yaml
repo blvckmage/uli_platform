@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: uli-platform
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: uli-data
+      mountPath: /var/data
+      sizeGB: 1

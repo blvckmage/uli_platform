@@ -1,0 +1,13 @@
+<%- include('partials/header') %>
+<h1>Уведомления</h1>
+<ul class="notif-list">
+<% items.forEach(n => { %>
+<li class="<%= n.is_read==='1'?'read':'unread' %>">
+  <div><strong><%= n.title %></strong> <small class="muted"><%= n.created_at %></small></div>
+  <div><%= n.message %></div>
+  <% if (n.is_read !== '1') { %><form method="post" action="/notifications/<%= n.id %>/read" style="display:inline"><button class="btn-sm">Отметить прочитанным</button></form><% } %>
+</li>
+<% }) %>
+<% if (!items.length) { %><p class="muted">Уведомлений нет</p><% } %>
+</ul>
+<%- include('partials/footer') %>

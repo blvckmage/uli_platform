@@ -1,0 +1,28 @@
+<%- include('partials/header') %>
+<h1>Отчеты</h1>
+<form class="filters" method="get">
+  <select name="business_id"><option value="">Все бизнесы</option><% businesses.forEach(b => { %><option value="<%= b.id %>" <%= filters.business_id===b.id?'selected':'' %>><%= b.name %></option><% }) %></select>
+  <select name="employee_id"><option value="">Все сотрудники</option><% users.forEach(e => { %><option value="<%= e.id %>" <%= filters.employee_id===e.id?'selected':'' %>><%= e.name %> <%= e.surname %></option><% }) %></select>
+  <input type="date" name="date" value="<%= filters.date || '' %>">
+  <select name="status"><option value="">Любой статус</option><% Object.entries(STATUS_LABELS).forEach(([k,v]) => { %><option value="<%= k %>" <%= filters.status===k?'selected':'' %>><%= v %></option><% }) %></select>
+  <button class="btn">Применить</button>
+</form>
+<table class="table">
+<thead><tr><th>Дата</th><th>Сотрудник</th><th>Бизнес</th><th>Задача</th><th>План</th><th>Факт</th><th>%</th><th>Статус</th><th>Комментарий</th></tr></thead>
+<tbody>
+<% items.forEach(t => { const e = users.find(x=>x.id===t.employee_id); const b = businesses.find(x=>x.id===t.business_id); %>
+<tr>
+  <td><%= t.task_date %></td>
+  <td><%= e ? e.name+' '+e.surname : '—' %></td>
+  <td><%= b ? b.name : '—' %></td>
+  <td><a href="/tasks/<%= t.id %>"><%= t.title %></a></td>
+  <td><%= t.planned_value %> <%= t.unit %></td>
+  <td><%= t.actual_value %></td>
+  <td><%= t.completion_percent %>%</td>
+  <td><span class="badge badge-<%= STATUS_COLORS[t.status] %>"><%= STATUS_LABELS[t.status] %></span></td>
+  <td><%= t.employee_comment %></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+<%- include('partials/footer') %>

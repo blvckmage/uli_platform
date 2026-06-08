@@ -1,0 +1,14 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Бизнесы</h1>
+  <a class="btn-primary" href="/businesses/new">+ Добавить бизнес</a>
+</div>
+<table class="table">
+  <thead><tr><th>Название</th><th>Тип</th><th>Город</th><th>Телефон</th><th>Статус</th></tr></thead>
+  <tbody>
+  <% items.forEach(b => { %>
+    <tr><td><a href="/businesses/<%= b.id %>"><%= b.name %></a></td><td><%= b.type %></td><td><%= b.city %></td><td><%= b.phone %></td><td><%= b.status %></td></tr>
+  <% }) %>
+  </tbody>
+</table>
+<%- include('partials/footer') %>

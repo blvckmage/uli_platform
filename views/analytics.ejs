@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+<h1>Аналитика</h1>
+
+<h2>Задачи</h2>
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-num"><%= taskStats.total %></div><div>Всего</div></div>
+  <div class="stat-card stat-green"><div class="stat-num"><%= taskStats.done %></div><div>Выполнено</div></div>
+  <div class="stat-card stat-yellow"><div class="stat-num"><%= taskStats.partial %></div><div>Частично</div></div>
+  <div class="stat-card stat-red"><div class="stat-num"><%= taskStats.failed %></div><div>Не выполнено</div></div>
+  <div class="stat-card stat-orange"><div class="stat-num"><%= taskStats.overdue %></div><div>Просрочено</div></div>
+  <div class="stat-card stat-blue"><div class="stat-num"><%= taskStats.total ? Math.round(taskStats.done/taskStats.total*100) : 0 %>%</div><div>Процент выполнения</div></div>
+</div>
+
+<h2>Сотрудники</h2>
+<table class="table">
+<thead><tr><th>Имя</th><th>Задач</th><th>Выполнено</th><th>Не выполнено</th><th>Средний %</th><th></th></tr></thead>
+<tbody>
+<% empStats.forEach(e => { %>
+<tr><td><%= e.name %></td><td><%= e.total %></td><td><%= e.done %></td><td><%= e.not_done %></td><td><%= e.avg %>%</td>
+<td><div class="bar"><div class="bar-fill" style="width:<%= Math.min(100,e.avg) %>%"></div></div></td></tr>
+<% }) %>
+</tbody>
+</table>
+
+<h2>Финансы по дням</h2>
+<table class="table">
+<thead><tr><th>Дата</th><th>Выручка</th><th>Расходы</th><th>Прибыль</th><th>График прибыли</th></tr></thead>
+<tbody>
+<% const maxProfit = Math.max(1, ...dates.map(d => byDate[d].profit)); dates.forEach(d => { %>
+<tr><td><%= d %></td><td><%= byDate[d].revenue.toLocaleString('ru-RU') %></td><td><%= byDate[d].expenses.toLocaleString('ru-RU') %></td><td><strong><%= byDate[d].profit.toLocaleString('ru-RU') %></strong></td>
+<td><div class="bar"><div class="bar-fill bar-green" style="width:<%= Math.max(0, byDate[d].profit/maxProfit*100) %>%"></div></div></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+<%- include('partials/footer') %>

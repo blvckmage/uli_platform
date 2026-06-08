@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Финансы</h1>
+  <a class="btn-primary" href="/finance/new">+ Добавить отчет</a>
+</div>
+<form class="filters" method="get">
+  <select name="business_id"><option value="">Все бизнесы</option><% businesses.forEach(b => { %><option value="<%= b.id %>" <%= filters.business_id===b.id?'selected':'' %>><%= b.name %></option><% }) %></select>
+  <input type="date" name="date" value="<%= filters.date || '' %>">
+  <button class="btn">Фильтр</button>
+</form>
+<table class="table">
+<thead><tr><th>Дата</th><th>Бизнес</th><th>Выручка</th><th>Расходы</th><th>Прибыль</th><th>Комментарий</th><th>Файл</th></tr></thead>
+<tbody>
+<% items.forEach(f => { const b = businesses.find(x => x.id===f.business_id); const file = files.find(x => x.id===f.file_id); %>
+<tr>
+  <td><%= f.report_date %></td>
+  <td><%= b ? b.name : '—' %></td>
+  <td><%= Number(f.revenue).toLocaleString('ru-RU') %> ₸</td>
+  <td><%= Number(f.expenses).toLocaleString('ru-RU') %> ₸</td>
+  <td><strong><%= Number(f.profit).toLocaleString('ru-RU') %> ₸</strong></td>
+  <td><%= f.comment %></td>
+  <td><% if (file) { %><a href="/finance/file/<%= file.id %>">📎 <%= file.original_name %></a><% } %></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+<%- include('partials/footer') %>

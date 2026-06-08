@@ -1,0 +1,30 @@
+<%- include('partials/header') %>
+<h1>Главная панель</h1>
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-num"><%= stats.businesses_count %></div><div>Бизнесов</div></div>
+  <div class="stat-card"><div class="stat-num"><%= stats.employees_count %></div><div>Сотрудников</div></div>
+  <div class="stat-card"><div class="stat-num"><%= stats.today_tasks %></div><div>Задач сегодня</div></div>
+  <div class="stat-card stat-green"><div class="stat-num"><%= stats.done %></div><div>Выполнено</div></div>
+  <div class="stat-card stat-red"><div class="stat-num"><%= stats.failed %></div><div>Не выполнено</div></div>
+  <div class="stat-card stat-orange"><div class="stat-num"><%= stats.overdue %></div><div>Просрочено</div></div>
+  <div class="stat-card stat-blue"><div class="stat-num"><%= stats.revenue.toLocaleString('ru-RU') %> ₸</div><div>Выручка сегодня</div></div>
+  <div class="stat-card"><div class="stat-num"><%= stats.expenses.toLocaleString('ru-RU') %> ₸</div><div>Расходы сегодня</div></div>
+  <div class="stat-card stat-green"><div class="stat-num"><%= stats.profit.toLocaleString('ru-RU') %> ₸</div><div>Прибыль сегодня</div></div>
+</div>
+
+<h2>Бизнесы</h2>
+<div class="cards-grid">
+<% bizCards.forEach(b => { %>
+  <a class="biz-card" href="/businesses/<%= b.id %>">
+    <h3><%= b.name %></h3>
+    <div class="muted"><%= b.type %> · <%= b.city %></div>
+    <div class="biz-stats">
+      <span>Сотрудников: <strong><%= b.employees_count %></strong></span>
+      <span>Задач сегодня: <strong><%= b.tasks_count %></strong></span>
+      <span>Выполнено: <strong><%= b.done_count %></strong></span>
+    </div>
+  </a>
+<% }) %>
+<% if (!bizCards.length) { %><p class="muted">Бизнесов пока нет. <a href="/businesses/new">Добавить</a></p><% } %>
+</div>
+<%- include('partials/footer') %>

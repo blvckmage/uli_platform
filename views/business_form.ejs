@@ -1,0 +1,18 @@
+<%- include('partials/header') %>
+<h1><%= item.id ? 'Редактировать' : 'Добавить' %> бизнес</h1>
+<form method="post" action="<%= action %>" class="form">
+  <label>Название<input name="name" value="<%= item.name || '' %>" required></label>
+  <label>Тип<input name="type" value="<%= item.type || '' %>" placeholder="общепит, клининг и т.д."></label>
+  <label>Описание<textarea name="description"><%= item.description || '' %></textarea></label>
+  <label>Город<input name="city" value="<%= item.city || '' %>"></label>
+  <label>Адрес<input name="address" value="<%= item.address || '' %>"></label>
+  <label>Телефон<input name="phone" value="<%= item.phone || '' %>"></label>
+  <label>Статус
+    <select name="status">
+      <option value="active" <%= item.status==='active'?'selected':'' %>>Активен</option>
+      <option value="inactive" <%= item.status==='inactive'?'selected':'' %>>Неактивен</option>
+    </select>
+  </label>
+  <button class="btn-primary" type="submit">Сохранить</button>
+</form>
+<%- include('partials/footer') %>

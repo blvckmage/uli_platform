@@ -1,0 +1,22 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Сотрудники</h1>
+  <a class="btn-primary" href="/employees/new">+ Добавить сотрудника</a>
+</div>
+<table class="table">
+  <thead><tr><th>Имя</th><th>Должность</th><th>Телефон</th><th>Логин</th><th>Роль</th><th>Бизнес</th><th>Статус</th></tr></thead>
+  <tbody>
+  <% items.forEach(e => { const b = businesses.find(x => x.id === e.business_id); %>
+    <tr>
+      <td><a href="/employees/<%= e.id %>"><%= e.name %> <%= e.surname %></a></td>
+      <td><%= e.phone %></td>
+      <td><%= e.phone %></td>
+      <td><%= e.email %></td>
+      <td><%= ROLE_LABELS[e.role] || e.role %></td>
+      <td><%= b ? b.name : '—' %></td>
+      <td><%= e.status %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<%- include('partials/footer') %>

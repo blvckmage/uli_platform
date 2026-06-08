@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+<h1>Создать задачу</h1>
+<form method="post" action="<%= action %>" class="form">
+  <label>Название задачи<input name="title" required placeholder="Обзвонить 100 клиентов"></label>
+  <label>Описание<textarea name="description"></textarea></label>
+  <label>Сотрудник
+    <select name="employee_id" required>
+      <% employees.forEach(e => { const b = businesses.find(x => x.id===e.business_id); %>
+        <option value="<%= e.id %>"><%= e.name %> <%= e.surname %> — <%= b ? b.name : 'без бизнеса' %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="row">
+    <label>Дата<input type="date" name="task_date" required value="<%= new Date().toISOString().slice(0,10) %>"></label>
+    <label>Время<input type="time" name="deadline_time"></label>
+    <label>Приоритет
+      <select name="priority"><option value="low">Низкий</option><option value="medium" selected>Средний</option><option value="high">Высокий</option></select>
+    </label>
+  </div>
+  <div class="row">
+    <label>План<input type="number" step="any" name="planned_value" placeholder="100"></label>
+    <label>Единица<input name="unit" placeholder="звонков, тенге, шт."></label>
+  </div>
+  <label>Комментарий руководителя<textarea name="manager_comment"></textarea></label>
+  <button class="btn-primary" type="submit">Создать</button>
+</form>
+<%- include('partials/footer') %>

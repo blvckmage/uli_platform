@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= biz.name %></h1>
+  <div>
+    <% if (['admin','partner'].includes(user.role)) { %>
+      <a class="btn" href="/businesses/<%= biz.id %>/edit">Редактировать</a>
+      <form method="post" action="/businesses/<%= biz.id %>/delete" style="display:inline" onsubmit="return confirm('Удалить бизнес?')"><button class="btn btn-danger" type="submit">Удалить</button></form>
+    <% } %>
+  </div>
+</div>
+<p class="muted"><%= biz.type %> · <%= biz.city %> · <%= biz.phone %></p>
+<p><%= biz.description %></p>
+
+<h2>Сотрудники (<%= employees.length %>)</h2>
+<ul class="simple-list">
+<% employees.forEach(e => { %><li><a href="/employees/<%= e.id %>"><%= e.name %> <%= e.surname %></a> — <%= ROLE_LABELS[e.role] %></li><% }) %>
+</ul>
+
+<h2>Задачи (<%= tasks.length %>)</h2>
+<ul class="simple-list">
+<% tasks.slice(0, 20).forEach(t => { %>
+  <li><a href="/tasks/<%= t.id %>"><%= t.title %></a> — <span class="badge badge-<%= STATUS_COLORS[t.status] %>"><%= STATUS_LABELS[t.status] %></span> · <%= t.task_date %></li>
+<% }) %>
+</ul>
+
+<h2>Финансы (последние 10)</h2>
+<table class="table">
+<thead><tr><th>Дата</th><th>Выручка</th><th>Расходы</th><th>Прибыль</th></tr></thead>
+<tbody>
+<% finance.slice(0,10).forEach(f => { %>
+<tr><td><%= f.report_date %></td><td><%= Number(f.revenue).toLocaleString('ru-RU') %></td><td><%= Number(f.expenses).toLocaleString('ru-RU') %></td><td><%= Number(f.profit).toLocaleString('ru-RU') %></td></tr>
+<% }) %>
+</tbody>
+</table>
+<%- include('partials/footer') %>

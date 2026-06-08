@@ -1,0 +1,33 @@
+<%- include('partials/header') %>
+<h1><%= item.id ? 'Редактировать' : 'Добавить' %> сотрудника</h1>
+<form method="post" action="<%= action %>" class="form">
+  <label>Имя<input name="name" value="<%= item.name || '' %>" required></label>
+  <label>Фамилия<input name="surname" value="<%= item.surname || '' %>"></label>
+  <label>Телефон<input name="phone" value="<%= item.phone || '' %>"></label>
+  <label>Email / логин<input name="email" value="<%= item.email || '' %>" required></label>
+  <label>Пароль <%= item.id ? '(оставьте пустым, чтобы не менять)' : '' %>
+    <input type="password" name="password" <%= item.id ? '' : 'required' %>>
+  </label>
+  <label>Роль
+    <select name="role">
+      <% Object.entries(ROLE_LABELS).forEach(([k,v]) => { if (k==='admin' && user.role!=='admin') return; %>
+        <option value="<%= k %>" <%= item.role===k?'selected':'' %>><%= v %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Бизнес
+    <select name="business_id">
+      <option value="">— не выбран —</option>
+      <% businesses.forEach(b => { %><option value="<%= b.id %>" <%= item.business_id===b.id?'selected':'' %>><%= b.name %></option><% }) %>
+    </select>
+  </label>
+  <label>Статус
+    <select name="status">
+      <option value="active" <%= item.status==='active'?'selected':'' %>>Активен</option>
+      <option value="disabled" <%= item.status==='disabled'?'selected':'' %>>Временно отключен</option>
+      <option value="fired" <%= item.status==='fired'?'selected':'' %>>Уволен</option>
+    </select>
+  </label>
+  <button class="btn-primary" type="submit">Сохранить</button>
+</form>
+<%- include('partials/footer') %>

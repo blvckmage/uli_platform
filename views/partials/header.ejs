@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ULI Platform</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<button class="menu-toggle" onclick="document.body.classList.toggle('menu-open')">☰ Меню</button>
+<aside class="sidebar">
+  <div class="brand">ULI Platform</div>
+  <nav>
+    <a href="/" class="<%= path === '/' ? 'active' : '' %>">🏠 Главная</a>
+    <% if (['admin','partner'].includes(user.role)) { %>
+      <a href="/businesses" class="<%= path.startsWith('/businesses') ? 'active' : '' %>">🏢 Бизнесы</a>
+    <% } %>
+    <% if (['admin','partner','manager'].includes(user.role)) { %>
+      <a href="/employees" class="<%= path.startsWith('/employees') ? 'active' : '' %>">👥 Сотрудники</a>
+    <% } %>
+    <a href="/tasks" class="<%= path.startsWith('/tasks') ? 'active' : '' %>">📋 Задачи</a>
+    <% if (['employee','accountant'].includes(user.role)) { %>
+      <a href="/my-tasks" class="<%= path === '/my-tasks' ? 'active' : '' %>">✅ Мои задачи</a>
+    <% } %>
+    <a href="/finance" class="<%= path.startsWith('/finance') ? 'active' : '' %>">💰 Финансы</a>
+    <% if (['admin','partner','manager'].includes(user.role)) { %>
+      <a href="/reports" class="<%= path.startsWith('/reports') ? 'active' : '' %>">📊 Отчеты</a>
+      <a href="/analytics" class="<%= path.startsWith('/analytics') ? 'active' : '' %>">📈 Аналитика</a>
+    <% } %>
+    <a href="/notifications" class="<%= path.startsWith('/notifications') ? 'active' : '' %>">🔔 Уведомления</a>
+  </nav>
+  <div class="user-block">
+    <div><strong><%= user.name %> <%= user.surname %></strong></div>
+    <small><%= ROLE_LABELS[user.role] || user.role %></small>
+    <a href="/logout" class="logout">Выйти</a>
+  </div>
+</aside>
+<main class="content">

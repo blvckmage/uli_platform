@@ -1,0 +1,36 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= t.title %></h1>
+  <span class="badge badge-<%= STATUS_COLORS[t.status] %>"><%= STATUS_LABELS[t.status] %></span>
+</div>
+<p class="muted">Дата: <%= t.task_date %> <%= t.deadline_time %> · Приоритет: <%= t.priority %> · Бизнес: <%= biz ? biz.name : '—' %> · Сотрудник: <%= emp ? emp.name+' '+emp.surname : '—' %></p>
+<p><%= t.description %></p>
+<% if (t.manager_comment) { %><blockquote><strong>Руководитель:</strong> <%= t.manager_comment %></blockquote><% } %>
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-num"><%= t.planned_value || '—' %> <%= t.unit %></div><div>План</div></div>
+  <div class="stat-card stat-green"><div class="stat-num"><%= t.actual_value || '0' %> <%= t.unit %></div><div>Факт</div></div>
+  <div class="stat-card stat-blue"><div class="stat-num"><%= t.completion_percent %>%</div><div>Выполнено</div></div>
+</div>
+
+<h2>Обновить</h2>
+<form method="post" action="/tasks/<%= t.id %>" class="form">
+  <label>Статус
+    <select name="status">
+      <% Object.entries(STATUS_LABELS).forEach(([k,v]) => { %><option value="<%= k %>" <%= t.status===k?'selected':'' %>><%= v %></option><% }) %>
+    </select>
+  </label>
+  <label>Фактический результат<input type="number" step="any" name="actual_value" value="<%= t.actual_value %>"></label>
+  <label>Комментарий сотрудника<textarea name="employee_comment"><%= t.employee_comment %></textarea></label>
+  <button class="btn-primary" type="submit">Сохранить</button>
+</form>
+
+<% if (['admin','partner','manager'].includes(user.role)) { %>
+<form method="post" action="/tasks/<%= t.id %>/delete" onsubmit="return confirm('Удалить задачу?')"><button class="btn btn-danger">Удалить задачу</button></form>
+<% } %>
+
+<h2>История</h2>
+<ul class="simple-list">
+<% history.forEach(h => { %><li><small><%= h.created_at %></small> — <%= h.action %>: <%= h.old_value %> → <%= h.new_value %></li><% }) %>
+</ul>
+<%- include('partials/footer') %>
