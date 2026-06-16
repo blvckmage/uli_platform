@@ -2,7 +2,7 @@
 <div class="page-head">
   <h1><%= biz.name %></h1>
   <div>
-    <% if (['admin','partner'].includes(user.role)) { %>
+    <% if (['admin'].includes(user.role)) { %>
       <a class="btn" href="/businesses/<%= biz.id %>/edit">Редактировать</a>
       <form method="post" action="/businesses/<%= biz.id %>/delete" style="display:inline" onsubmit="return confirm('Удалить бизнес?')"><button class="btn btn-danger" type="submit">Удалить</button></form>
     <% } %>

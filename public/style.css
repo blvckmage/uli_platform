@@ -100,6 +100,15 @@ blockquote { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.8re
 .bar-fill { height: 100%; background: #3b82f6; transition: width 0.3s; }
 .bar-green { background: #10b981; }
 
+.chart-grid { display:flex; gap:1rem; margin-top:1rem; }
+.chart-day { background: white; padding:0.6rem; border-radius:8px; width:120px; text-align:center; }
+.chart-label { font-size:0.8rem; color:#6b7280; margin-bottom:0.4rem; }
+.chart-bars { display:flex; gap:4px; align-items:end; height:80px; justify-content:center; }
+.chart-bars .bar { width:32px; height:100%; background:#f3f4f6; border-radius:6px 6px 0 0; display:flex; align-items:flex-end; }
+.chart-bars .bar.done { background:linear-gradient(180deg,#10b981,#059669); }
+.chart-bars .bar.notdone { background:linear-gradient(180deg,#f97316,#ef4444); }
+.chart-nums { margin-top:0.4rem; font-size:0.85rem; color:#374151; }
+
 .notif-list { list-style: none; padding: 0; }
 .notif-list li { background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 8px; border-left: 4px solid #3b82f6; }
 .notif-list li.read { opacity: 0.6; border-left-color: #94a3b8; }

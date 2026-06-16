@@ -65,7 +65,7 @@ function requireRole(...roles) {
   };
 }
 function canAccessBusiness(user, businessId) {
-  if (user.role === 'admin' || user.role === 'partner') return true;
+  if (user.role === 'admin') return true;
   return String(user.business_id) === String(businessId);
 }
 function recalcTaskStatus(task) {
@@ -100,8 +100,8 @@ const STATUS_COLORS = {
   partial: 'yellow', failed: 'red', overdue: 'orange'
 };
 const ROLE_LABELS = {
-  admin: 'Главный администратор', partner: 'Партнер',
-  manager: 'Управляющий', accountant: 'Бухгалтер', employee: 'Сотрудник'
+  admin: 'Главный администратор',
+  manager: 'Управляющий'
 };
 app.use((req, res, next) => {
   res.locals.STATUS_LABELS = STATUS_LABELS;
@@ -133,7 +133,7 @@ app.get('/logout', (req, res) => { req.session.destroy(() => res.redirect('/logi
 // --- DASHBOARD ---
 app.get('/', requireAuth, (req, res) => {
   const u = req.user;
-  if (u.role === 'employee' || u.role === 'accountant') return res.redirect('/my-tasks');
+  if (u.role === 'manager') return res.redirect('/my-tasks');
 
   let tasks = db.tasks.all().map(recalcTaskStatus);
   let businesses = db.businesses.all();
@@ -144,9 +144,21 @@ app.get('/', requireAuth, (req, res) => {
   const today = new Date().toISOString().slice(0, 10);
   const todayTasks = tasks.filter(t => t.task_date === today);
   const finance = db.finance_reports.filter(f => f.report_date === today);
-  const employees = db.users.filter(usr => usr.role === 'employee' || usr.role === 'manager' || usr.role === 'accountant');
+  const employees = db.users.filter(usr => usr.role === 'manager');
 
   const sumBy = arr => arr.reduce((s, x) => s + (parseFloat(x) || 0), 0);
+
+  // prepare last 7 days stats for charts
+  const chartDates = [];
+  const chartData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(Date.now() - i * 86400000).toISOString().slice(0,10);
+    chartDates.push(d);
+    const dayTasks = tasks.filter(t => t.task_date === d);
+    const done = dayTasks.filter(t => t.status === 'completed').length;
+    const notDone = dayTasks.length - done;
+    chartData.push({ date: d, done, notDone, total: dayTasks.length });
+  }
 
   res.render('dashboard', {
     businesses,
@@ -165,18 +177,20 @@ app.get('/', requireAuth, (req, res) => {
       const bt = tasks.filter(t => t.business_id === b.id && t.task_date === today);
       const emps = employees.filter(e => e.business_id === b.id);
       return { ...b, employees_count: emps.length, tasks_count: bt.length, done_count: bt.filter(t => t.status === 'completed').length };
-    })
+  }),
+  chartDates: chartDates,
+  chartData: chartData
   });
 });
 
 // --- BUSINESSES ---
-app.get('/businesses', requireAuth, requireRole('admin', 'partner'), (req, res) => {
+app.get('/businesses', requireAuth, requireRole('admin'), (req, res) => {
   res.render('businesses', { items: db.businesses.all() });
 });
-app.get('/businesses/new', requireAuth, requireRole('admin', 'partner'), (req, res) => {
+app.get('/businesses/new', requireAuth, requireRole('admin'), (req, res) => {
   res.render('business_form', { item: {}, action: '/businesses' });
 });
-app.post('/businesses', requireAuth, requireRole('admin', 'partner'), (req, res) => {
+app.post('/businesses', requireAuth, requireRole('admin'), (req, res) => {
   db.businesses.insert({
     name: req.body.name, type: req.body.type, description: req.body.description,
     city: req.body.city, address: req.body.address, phone: req.body.phone, status: req.body.status || 'active'
@@ -192,12 +206,12 @@ app.get('/businesses/:id', requireAuth, (req, res) => {
   const finance = db.finance_reports.filter(f => f.business_id === b.id);
   res.render('business_view', { biz: b, employees, tasks, finance });
 });
-app.get('/businesses/:id/edit', requireAuth, requireRole('admin', 'partner'), (req, res) => {
+app.get('/businesses/:id/edit', requireAuth, requireRole('admin'), (req, res) => {
   const b = db.businesses.findById(req.params.id);
   if (!b) return res.status(404).send('Не найдено');
   res.render('business_form', { item: b, action: '/businesses/' + b.id });
 });
-app.post('/businesses/:id', requireAuth, requireRole('admin', 'partner'), (req, res) => {
+app.post('/businesses/:id', requireAuth, requireRole('admin'), (req, res) => {
   db.businesses.update(req.params.id, req.body);
   res.redirect('/businesses/' + req.params.id);
 });
@@ -207,26 +221,26 @@ app.post('/businesses/:id/delete', requireAuth, requireRole('admin'), (req, res)
 });
 
 // --- EMPLOYEES ---
-app.get('/employees', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.get('/employees', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   let list = db.users.filter(u => u.role !== 'admin');
   if (req.user.role === 'manager') list = list.filter(u => u.business_id === req.user.business_id);
   res.render('employees', { items: list });
 });
-app.get('/employees/new', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.get('/employees/new', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   res.render('employee_form', { item: {}, action: '/employees' });
 });
-app.post('/employees', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.post('/employees', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   const body = req.body;
   if (req.user.role === 'manager') body.business_id = req.user.business_id;
   const phone = formatPhone(body.phone);
-  if (body.role !== 'admin' && body.role !== 'partner' && !phone) {
+  if (!phone) {
     return res.status(400).send('Неверный формат телефона. Используйте 7(XXX) - XXX - XXXX');
   }
   const hash = bcrypt.hashSync(body.password || 'changeme', 8);
   db.users.insert({
     name: body.name, surname: body.surname, phone: phone || body.phone || '',
     email: body.email || phone || '',
-    password_hash: hash, role: body.role || 'employee', business_id: body.business_id || '',
+  password_hash: hash, role: body.role || 'manager', business_id: body.business_id || '',
     status: body.status || 'active'
   });
   res.redirect('/employees');
@@ -235,17 +249,16 @@ app.get('/employees/:id', requireAuth, (req, res) => {
   const emp = db.users.findById(req.params.id);
   if (!emp) return res.status(404).send('Не найдено');
   if (req.user.role === 'manager' && emp.business_id !== req.user.business_id) return res.status(403).send('Доступ запрещен');
-  if (req.user.role === 'employee' && emp.id !== req.user.id) return res.status(403).send('Доступ запрещен');
   const tasks = db.tasks.filter(t => t.employee_id === emp.id).map(recalcTaskStatus);
   const biz = emp.business_id ? db.businesses.findById(emp.business_id) : null;
   res.render('employee_view', { emp, tasks, biz });
 });
-app.get('/employees/:id/edit', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.get('/employees/:id/edit', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   const emp = db.users.findById(req.params.id);
   if (!emp) return res.status(404).send('Не найдено');
   res.render('employee_form', { item: emp, action: '/employees/' + emp.id });
 });
-app.post('/employees/:id', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.post('/employees/:id', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   const patch = { ...req.body };
   if (patch.password) { patch.password_hash = bcrypt.hashSync(patch.password, 8); }
   delete patch.password;
@@ -256,7 +269,7 @@ app.post('/employees/:id', requireAuth, requireRole('admin', 'partner', 'manager
   db.users.update(req.params.id, patch);
   res.redirect('/employees/' + req.params.id);
 });
-app.post('/employees/:id/delete', requireAuth, requireRole('admin', 'partner'), (req, res) => {
+app.post('/employees/:id/delete', requireAuth, requireRole('admin'), (req, res) => {
   db.users.remove(req.params.id);
   res.redirect('/employees');
 });
@@ -265,7 +278,6 @@ app.post('/employees/:id/delete', requireAuth, requireRole('admin', 'partner'), 
 app.get('/tasks', requireAuth, (req, res) => {
   let list = db.tasks.all().map(recalcTaskStatus);
   if (req.user.role === 'manager') list = list.filter(t => t.business_id === req.user.business_id);
-  else if (req.user.role === 'employee' || req.user.role === 'accountant') list = list.filter(t => t.employee_id === req.user.id);
 
   const { business_id, employee_id, date, status } = req.query;
   if (business_id) list = list.filter(t => t.business_id === business_id);
@@ -276,12 +288,12 @@ app.get('/tasks', requireAuth, (req, res) => {
   const employees = db.users.filter(u => u.role !== 'admin');
   res.render('tasks', { items: list, employees, filters: req.query });
 });
-app.get('/tasks/new', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.get('/tasks/new', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   let employees = db.users.filter(u => u.role !== 'admin' && u.status === 'active');
   if (req.user.role === 'manager') employees = employees.filter(e => e.business_id === req.user.business_id);
   res.render('task_form', { item: {}, employees, action: '/tasks' });
 });
-app.post('/tasks', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.post('/tasks', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   const emp = db.users.findById(req.body.employee_id);
   const t = db.tasks.insert({
     business_id: emp ? emp.business_id : '',
@@ -302,19 +314,19 @@ app.post('/tasks', requireAuth, requireRole('admin', 'partner', 'manager'), (req
 app.get('/tasks/:id', requireAuth, (req, res) => {
   const t = db.tasks.findById(req.params.id);
   if (!t) return res.status(404).send('Не найдено');
-  if (req.user.role === 'employee' && t.employee_id !== req.user.id) return res.status(403).send('Доступ запрещен');
   if (req.user.role === 'manager' && t.business_id !== req.user.business_id) return res.status(403).send('Доступ запрещен');
   recalcTaskStatus(t);
   const emp = db.users.findById(t.employee_id);
   const biz = db.businesses.findById(t.business_id);
   const history = db.task_history.filter(h => h.task_id === t.id);
-  res.render('task_view', { t, emp, biz, history });
+  const comments = db.task_comments.filter(c => c.task_id === t.id).map(c => ({ ...c, user: db.users.findById(c.user_id) }));
+  res.render('task_view', { t, emp, biz, history, comments });
 });
 app.post('/tasks/:id', requireAuth, (req, res) => {
   const t = db.tasks.findById(req.params.id);
   if (!t) return res.status(404).send('Не найдено');
   const isOwner = t.employee_id === req.user.id;
-  const isManager = ['admin','partner','manager'].includes(req.user.role);
+  const isManager = ['admin','manager'].includes(req.user.role);
   if (!isOwner && !isManager) return res.status(403).send('Доступ запрещен');
 
   const patch = {};
@@ -336,7 +348,19 @@ app.post('/tasks/:id', requireAuth, (req, res) => {
   if (patch.status === 'completed') notify(t.created_by, 'Задача выполнена', t.title);
   res.redirect('/tasks/' + t.id);
 });
-app.post('/tasks/:id/delete', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+
+// --- TASK COMMENTS ---
+app.post('/tasks/:id/comment', requireAuth, (req, res) => {
+  const t = db.tasks.findById(req.params.id);
+  if (!t) return res.status(404).send('Не найдено');
+  if (!canAccessBusiness(req.user, t.business_id) && req.user.id !== t.employee_id && req.user.role !== 'admin') return res.status(403).send('Доступ запрещен');
+  const text = (req.body.comment || '').trim();
+  if (!text) return res.redirect('/tasks/' + t.id);
+  db.task_comments.insert({ task_id: t.id, user_id: req.user.id, comment: text });
+  db.task_history.insert({ task_id: t.id, user_id: req.user.id, action: 'commented', old_value: '', new_value: text });
+  res.redirect('/tasks/' + t.id);
+});
+app.post('/tasks/:id/delete', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   db.tasks.remove(req.params.id);
   res.redirect('/tasks');
 });
@@ -355,50 +379,10 @@ app.get('/my-tasks', requireAuth, (req, res) => {
   });
 });
 
-// --- FINANCE ---
-app.get('/finance', requireAuth, (req, res) => {
-  let list = db.finance_reports.all();
-  if (req.user.role === 'manager' || req.user.role === 'accountant') {
-    list = list.filter(f => f.business_id === req.user.business_id);
-  }
-  const { business_id, date } = req.query;
-  if (business_id) list = list.filter(f => f.business_id === business_id);
-  if (date) list = list.filter(f => f.report_date === date);
-  list.sort((a, b) => (b.report_date || '').localeCompare(a.report_date || ''));
-  res.render('finance', { items: list, files: db.files.all(), filters: req.query });
-});
-app.get('/finance/new', requireAuth, requireRole('admin', 'partner', 'manager', 'accountant'), (req, res) => {
-  res.render('finance_form', { item: {} });
-});
-app.post('/finance', requireAuth, requireRole('admin', 'partner', 'manager', 'accountant'), upload.single('excel'), (req, res) => {
-  let fileId = '';
-  if (req.file) {
-    const f = db.files.insert({
-      uploaded_by: req.user.id, business_id: req.body.business_id,
-      original_name: req.file.originalname, file_path: req.file.filename,
-      file_type: req.file.mimetype, file_size: String(req.file.size)
-    });
-    fileId = f.id;
-  }
-  const revenue = parseFloat(req.body.revenue) || 0;
-  const expenses = parseFloat(req.body.expenses) || 0;
-  db.finance_reports.insert({
-    business_id: req.body.business_id, accountant_id: req.user.id,
-    report_date: req.body.report_date, revenue: String(revenue),
-    expenses: String(expenses), profit: String(revenue - expenses),
-    comment: req.body.comment || '', file_id: fileId
-  });
-  res.redirect('/finance');
-});
-app.get('/finance/file/:id', requireAuth, (req, res) => {
-  const f = db.files.findById(req.params.id);
-  if (!f) return res.status(404).send('Файл не найден');
-  if (!canAccessBusiness(req.user, f.business_id)) return res.status(403).send('Доступ запрещен');
-  res.download(path.join(db.UPLOAD_DIR, f.file_path), f.original_name);
-});
+// Finance pages removed per request - finance routes disabled
 
 // --- REPORTS ---
-app.get('/reports', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.get('/reports', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   let tasks = db.tasks.all().map(recalcTaskStatus);
   if (req.user.role === 'manager') tasks = tasks.filter(t => t.business_id === req.user.business_id);
   const { business_id, employee_id, date, status } = req.query;
@@ -411,7 +395,7 @@ app.get('/reports', requireAuth, requireRole('admin', 'partner', 'manager'), (re
 });
 
 // --- ANALYTICS ---
-app.get('/analytics', requireAuth, requireRole('admin', 'partner', 'manager'), (req, res) => {
+app.get('/analytics', requireAuth, requireRole('admin', 'manager'), (req, res) => {
   let tasks = db.tasks.all().map(recalcTaskStatus);
   let finance = db.finance_reports.all();
   if (req.user.role === 'manager') {
@@ -425,7 +409,7 @@ app.get('/analytics', requireAuth, requireRole('admin', 'partner', 'manager'), (
     overdue: tasks.filter(t => t.status === 'overdue').length,
     partial: tasks.filter(t => t.status === 'partial').length
   };
-  const employees = db.users.filter(u => u.role === 'employee' || u.role === 'manager');
+  const employees = db.users.filter(u => u.role === 'manager');
   const empStats = employees.map(e => {
     const my = tasks.filter(t => t.employee_id === e.id);
     const done = my.filter(t => t.status === 'completed').length;

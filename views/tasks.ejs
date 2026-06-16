@@ -1,8 +1,8 @@
 <%- include('partials/header') %>
 <div class="page-head">
   <h1>Задачи</h1>
-  <% if (['admin','partner','manager'].includes(user.role)) { %>
-    <a class="btn-primary" href="/tasks/new">+ Создать задачу</a>
+  <% if (['admin','manager'].includes(user.role)) { %>
+    <a class="btn-primary" href="/tasks/new">+ Добавить задачу</a>
   <% } %>
 </div>
 <form class="filters" method="get">

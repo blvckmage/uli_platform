@@ -27,4 +27,18 @@
 <% }) %>
 <% if (!bizCards.length) { %><p class="muted">Бизнесов пока нет. <a href="/businesses/new">Добавить</a></p><% } %>
 </div>
+
+<h2>Графики задач (последние 7 дней)</h2>
+<div class="chart-grid">
+  <% (chartData || []).forEach(d => { %>
+    <div class="chart-day">
+      <div class="chart-label"><%= d.date %></div>
+      <div class="chart-bars">
+  <div class="bar done" style="height:<%= (d.total ? Math.round(d.done / d.total * 100) : 0) + '%' %>" title="Выполнено: <%= d.done %>"></div>
+  <div class="bar notdone" style="height:<%= (d.total ? Math.round(d.notDone / d.total * 100) : 0) + '%' %>" title="Не выполнено: <%= d.notDone %>"></div>
+      </div>
+      <div class="chart-nums"><small><%= d.done %> / <%= d.total %></small></div>
+    </div>
+  <% }) %>
+</div>
 <%- include('partials/footer') %>

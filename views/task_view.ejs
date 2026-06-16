@@ -25,7 +25,7 @@
   <button class="btn-primary" type="submit">Сохранить</button>
 </form>
 
-<% if (['admin','partner','manager'].includes(user.role)) { %>
+<% if (['admin','manager'].includes(user.role)) { %>
 <form method="post" action="/tasks/<%= t.id %>/delete" onsubmit="return confirm('Удалить задачу?')"><button class="btn btn-danger">Удалить задачу</button></form>
 <% } %>
 
@@ -33,4 +33,16 @@
 <ul class="simple-list">
 <% history.forEach(h => { %><li><small><%= h.created_at %></small> — <%= h.action %>: <%= h.old_value %> → <%= h.new_value %></li><% }) %>
 </ul>
+ 
+<h2>Комментарии</h2>
+<ul class="simple-list">
+  <% (comments || []).forEach(c => { %>
+    <li><small><%= c.created_at %></small> — <strong><%= c.user ? (c.user.name + ' ' + c.user.surname) : 'Пользователь' %>:</strong> <%= c.comment %></li>
+  <% }) %>
+</ul>
+
+<form method="post" action="/tasks/<%= t.id %>/comment" class="form">
+  <label>Добавить комментарий<textarea name="comment"></textarea></label>
+  <button class="btn-primary" type="submit">Отправить</button>
+</form>
 <%- include('partials/footer') %>

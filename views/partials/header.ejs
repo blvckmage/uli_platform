@@ -12,18 +12,18 @@
   <div class="brand">ULI Platform</div>
   <nav>
     <a href="/" class="<%= path === '/' ? 'active' : '' %>">🏠 Главная</a>
-    <% if (['admin','partner'].includes(user.role)) { %>
+    <% if (['admin'].includes(user.role)) { %>
       <a href="/businesses" class="<%= path.startsWith('/businesses') ? 'active' : '' %>">🏢 Бизнесы</a>
     <% } %>
-    <% if (['admin','partner','manager'].includes(user.role)) { %>
+    <% if (['admin','manager'].includes(user.role)) { %>
       <a href="/employees" class="<%= path.startsWith('/employees') ? 'active' : '' %>">👥 Сотрудники</a>
     <% } %>
     <a href="/tasks" class="<%= path.startsWith('/tasks') ? 'active' : '' %>">📋 Задачи</a>
-    <% if (['employee','accountant'].includes(user.role)) { %>
+    <% if (['manager'].includes(user.role)) { %>
       <a href="/my-tasks" class="<%= path === '/my-tasks' ? 'active' : '' %>">✅ Мои задачи</a>
     <% } %>
-    <a href="/finance" class="<%= path.startsWith('/finance') ? 'active' : '' %>">💰 Финансы</a>
-    <% if (['admin','partner','manager'].includes(user.role)) { %>
+  <!-- Финансы удалены -->
+  <% if (['admin','manager'].includes(user.role)) { %>
       <a href="/reports" class="<%= path.startsWith('/reports') ? 'active' : '' %>">📊 Отчеты</a>
       <a href="/analytics" class="<%= path.startsWith('/analytics') ? 'active' : '' %>">📈 Аналитика</a>
     <% } %>

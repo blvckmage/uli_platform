@@ -1,7 +1,7 @@
 <%- include('partials/header') %>
 <div class="page-head">
   <h1><%= emp.name %> <%= emp.surname %></h1>
-  <% if (['admin','partner','manager'].includes(user.role)) { %>
+  <% if (['admin','manager'].includes(user.role)) { %>
     <a class="btn" href="/employees/<%= emp.id %>/edit">Редактировать</a>
   <% } %>
 </div>

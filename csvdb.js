@@ -104,5 +104,6 @@ const finance_reports = new Table('finance_reports', ['id','business_id','accoun
 const files = new Table('files', ['id','uploaded_by','business_id','original_name','file_path','file_type','file_size','created_at','updated_at']);
 const notifications = new Table('notifications', ['id','user_id','title','message','is_read','created_at','updated_at']);
 const task_history = new Table('task_history', ['id','task_id','user_id','action','old_value','new_value','created_at','updated_at']);
+const task_comments = new Table('task_comments', ['id','task_id','user_id','comment','created_at','updated_at']);
 
-module.exports = { users, businesses, tasks, finance_reports, files, notifications, task_history, DATA_DIR, UPLOAD_DIR };
+module.exports = { users, businesses, tasks, finance_reports, files, notifications, task_history, task_comments, DATA_DIR, UPLOAD_DIR };
