@@ -1,7 +1,9 @@
 <%- include('partials/header') %>
 <div class="page-head">
   <h1>Сотрудники</h1>
-  <a class="btn-primary" href="/employees/new">+ Добавить сотрудника</a>
+  <% if (['admin'].includes(user.role)) { %>
+    <a class="btn-primary" href="/employees/new">+ Добавить сотрудника</a>
+  <% } %>
 </div>
 <table class="table">
   <thead><tr><th>Имя</th><th>Должность</th><th>Телефон</th><th>Логин</th><th>Роль</th><th>Бизнес</th><th>Статус</th></tr></thead>

@@ -25,14 +25,36 @@
   <button class="btn-primary" type="submit">Сохранить</button>
 </form>
 
-<% if (['admin','manager'].includes(user.role)) { %>
-<form method="post" action="/tasks/<%= t.id %>/delete" onsubmit="return confirm('Удалить задачу?')"><button class="btn btn-danger">Удалить задачу</button></form>
+<% if (['admin'].includes(user.role)) { %>
+  <form method="post" action="/tasks/<%= t.id %>/delete" onsubmit="return confirm('Удалить задачу?')"><button class="btn btn-danger">Удалить задачу</button></form>
 <% } %>
 
 <h2>История</h2>
-<ul class="simple-list">
-<% history.forEach(h => { %><li><small><%= h.created_at %></small> — <%= h.action %>: <%= h.old_value %> → <%= h.new_value %></li><% }) %>
-</ul>
+<button id="show-history" class="btn">Показать историю</button>
+
+<!-- History modal -->
+<div id="history-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <button class="modal-close" id="close-history">✕</button>
+    <h3>История задачи</h3>
+    <ul class="simple-list">
+    <% history.forEach(h => { %>
+      <li><small><%= h.created_at %></small> — <%= h.action %>: <%= h.old_value %> → <%= h.new_value %></li>
+    <% }) %>
+    </ul>
+  </div>
+</div>
+<script>
+  (function(){
+    var btn = document.getElementById('show-history');
+    var modal = document.getElementById('history-modal');
+    var close = document.getElementById('close-history');
+    if (!btn || !modal) return;
+    btn.addEventListener('click', function(){ modal.style.display = 'block'; document.body.style.overflow='hidden'; });
+    close.addEventListener('click', function(){ modal.style.display='none'; document.body.style.overflow=''; });
+    modal.addEventListener('click', function(e){ if (e.target === modal) { modal.style.display='none'; document.body.style.overflow=''; } });
+  })();
+</script>
  
 <h2>Комментарии</h2>
 <ul class="simple-list">

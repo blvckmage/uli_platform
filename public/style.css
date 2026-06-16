@@ -109,6 +109,11 @@ blockquote { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.8re
 .chart-bars .bar.notdone { background:linear-gradient(180deg,#f97316,#ef4444); }
 .chart-nums { margin-top:0.4rem; font-size:0.85rem; color:#374151; }
 
+/* Modal */
+.modal { position: fixed; left:0; top:0; right:0; bottom:0; background: rgba(0,0,0,0.45); display:flex; align-items:center; justify-content:center; padding:1rem; z-index:2000; }
+.modal-content { background:white; border-radius:8px; padding:1rem 1.2rem; width:100%; max-width:800px; position:relative; box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+.modal-close { position:absolute; top:8px; right:8px; background:transparent; border:none; font-size:1.1rem; cursor:pointer; }
+
 .notif-list { list-style: none; padding: 0; }
 .notif-list li { background: white; padding: 1rem; margin-bottom: 0.5rem; border-radius: 8px; border-left: 4px solid #3b82f6; }
 .notif-list li.read { opacity: 0.6; border-left-color: #94a3b8; }

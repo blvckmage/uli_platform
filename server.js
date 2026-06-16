@@ -226,10 +226,10 @@ app.get('/employees', requireAuth, requireRole('admin', 'manager'), (req, res) =
   if (req.user.role === 'manager') list = list.filter(u => u.business_id === req.user.business_id);
   res.render('employees', { items: list });
 });
-app.get('/employees/new', requireAuth, requireRole('admin', 'manager'), (req, res) => {
+app.get('/employees/new', requireAuth, requireRole('admin'), (req, res) => {
   res.render('employee_form', { item: {}, action: '/employees' });
 });
-app.post('/employees', requireAuth, requireRole('admin', 'manager'), (req, res) => {
+app.post('/employees', requireAuth, requireRole('admin'), (req, res) => {
   const body = req.body;
   if (req.user.role === 'manager') body.business_id = req.user.business_id;
   const phone = formatPhone(body.phone);
@@ -360,7 +360,7 @@ app.post('/tasks/:id/comment', requireAuth, (req, res) => {
   db.task_history.insert({ task_id: t.id, user_id: req.user.id, action: 'commented', old_value: '', new_value: text });
   res.redirect('/tasks/' + t.id);
 });
-app.post('/tasks/:id/delete', requireAuth, requireRole('admin', 'manager'), (req, res) => {
+app.post('/tasks/:id/delete', requireAuth, requireRole('admin'), (req, res) => {
   db.tasks.remove(req.params.id);
   res.redirect('/tasks');
 });
